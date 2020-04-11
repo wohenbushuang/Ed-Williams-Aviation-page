@@ -1,4 +1,6 @@
 # Ed Williams的航空主页
+[原始页面](http://edwilliams.org/) | [Backup of original English version](../en-us/index.md)
+
 ![我的182飞机](../en-us/n9006m_s.jpg)
 
 **我的182飞机**

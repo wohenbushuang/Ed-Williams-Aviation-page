@@ -1,3 +1,5 @@
+[原始页面](http://edwilliams.org/intersect.htm) | [Backup of original English version](../en-us/intersect.md)
+
 以下用于寻找由从 `点1 (lat1, lon1)` 到 `点2` 和从 `点3` 到 `点4` 的圆弧定义的两个大圆的交点。
 
 -----------------

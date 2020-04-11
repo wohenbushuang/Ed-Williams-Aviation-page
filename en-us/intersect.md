@@ -1,3 +1,5 @@
+[Original page](http://edwilliams.org/intersect.htm) | [中文翻译版](../zh-cn/intersect.md)
+
 To find the intersection of two great circles defined by the arcs from `pt1 (lat1, lon1)` to `pt2` and from `pt3` to `pt4`.
 
 -----------------

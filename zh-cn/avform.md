@@ -1,4 +1,6 @@
 # 航空公式集 V1.46
+[原始页面](http://edwilliams.org/avform.htm) | [Backup of original English version](../en-us/avform.md)
+
 ### 原作者 Ed Williams
 
 #### 目录

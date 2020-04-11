@@ -1,4 +1,6 @@
 # Ed Williams' Aviation page.
+[Original page](http://edwilliams.org/) | [中文翻译版](../zh-cn/index.md)
+
 ![My 182](n9006m_s.jpg)
 
 **My 182**

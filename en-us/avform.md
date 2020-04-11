@@ -1,4 +1,6 @@
 # Aviation Formulary V1.46
+[Original page](http://edwilliams.org/avform.htm) | [中文翻译版](../zh-cn/avform.md)
+
 ### By Ed Williams
 
 #### Table of Contents
