@@ -57,7 +57,7 @@ I will assume the reader is familiar with latitude and longitude as a means of d
 
 The first important fact to realise is that in general a great circle route has a true course that varies from point to point. For instance the great circle route between two points of equal (non-zero) latitude does not follow the line of latitude in an E-W direction, but arcs towards the pole. It *is* possible to fly between two points using an unvarying true course, but in general the resulting route differs from the great circle route and is called a rhumb line. Unlike a great circle which encircles the earth in a closed curve, a pilot flying a *rhumb* line would spiral poleward.
 
-Natural questions are to seek the great circle distance between two specified points and true course at points along the route. The required spherical trigonometric formulae are greatly simplified if angles and distances are measured in the appropriate natural units, which are both radians! A radian, by definition, is the angle subtended by a circular arc of unit length and unit radius. Since the length of a complete circular arc of unit radius is 2*pi, the conversion is 360 degrees equals 2*pi radians, or:
+Natural questions are to seek the great circle distance between two specified points and true course at points along the route. The required spherical trigonometric formulae are greatly simplified if angles and distances are measured in the appropriate natural units, which are both radians! A radian, by definition, is the angle subtended by a circular arc of unit length and unit radius. Since the length of a complete circular arc of unit radius is `2*pi`, the conversion is 360 degrees equals `2*pi` radians, or:
 ```
       angle_radians=(pi/180)*angle_degrees
       angle_degrees=(180/pi)*angle_radians
@@ -84,7 +84,7 @@ to convert between angular and distance units.
 
 A sample implementation of many of these formulae in the form of an Excel spreadsheet can be found [here](http://edwilliams.org/ftp/avsig/avform.xls). The formulae are in VBA macros, for readability, so you will need to enable macros to have them work. If you are unable to open the spreadsheet with macros disabled (to check for viruses) etc, then you may need to patch your Excel. Try http://office.microsoft.com/downloaddetails/Xl8p9pkg.htm for Excel 97 SR-2.
 
-*If you decide to program up these formulae, you'd be well-advised to look at the [implementation](#implement) notes and check your results against the worked [examples](#example) and spreadsheets.*
+*If you decide to program up these formulae, you'd be well-advised to look at the [implementation notes](#implement) and check your results against the [worked examples](#example) and spreadsheets.*
 
 ---
 
