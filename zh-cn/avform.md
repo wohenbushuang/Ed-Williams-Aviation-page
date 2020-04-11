@@ -471,3 +471,121 @@ lon3=2.027876      =116.189W  在爱达荷州埃达郡博伊西市博伊西机�
 ```
 ---
 #### 一些通用的球面三角形公式
+球面三角形是指其边都是大圆圆弧的三角形。设边的长度为`a`、`b`和`c`弧度，相对的角度为`A`、`B`和`C`弧度。
+```
+                c
+           A -------B
+            \       |
+             \      |
+              \b    |a
+               \    |
+                \   |
+                 \  |
+                  \C|
+                   \|
+
+    （角B不需要是直角）
+
+      sin(a)  sin(b)   sin(c)
+      ----- = ------ = ------
+      sin(A)  sin(B)   sin(C)
+    
+  cos(a)=cos(b)*cos(c)+sin(b)*sin(c)*cos(A)
+  cos(b)=cos(c)*cos(a)+sin(c)*sin(a)*cos(B)
+  cos(c)=cos(a)*cos(b)+sin(a)*sin(b)*cos(C)
+
+  cos(A)=-cos(B)*cos(C)+sin(B)*sin(C)*cos(a)
+  cos(B)=-cos(C)*cos(A)+sin(C)*sin(A)*cos(b)
+  cos(C)=-cos(A)*cos(B)+sin(A)*sin(B)*cos(c)
+
+  这些式子的一些有用的结果：
+
+  tan(A)=sin(B)*sin(a)/(sin(c)*cos(a)-cos(B)*cos(c)*sin(a))
+  tan(B)=sin(C)*sin(b)/(sin(a)*cos(b)-cos(C)*cos(a)*sin(b))
+  tan(C)=sin(A)*sin(c)/(sin(b)*cos(c)-cos(A)*cos(b)*sin(c))
+
+  tan(a)=sin(b)*sin(A)/(sin(C)*cos(A)+cos(b)*cos(C)*sin(A))
+  tan(b)=sin(c)*sin(B)/(sin(A)*cos(B)+cos(c)*cos(A)*sin(B))
+  tan(c)=sin(a)*sin(C)/(sin(B)*cos(C)+cos(a)*cos(B)*sin(C)) 
+```
+给定`{a,b,c,A,B,C}`中**任意**三个，剩余的边和角可以用这些式子求出。球面三角形的求解（要求`0 < a,b,c,A,B,C < pi`以避免无效组合）：
+```
+  给定{A,b,c}：  // 2条边，夹1个角
+   a=acos(cos(b)*cos(c)+sin(b)*sin(c)*cos(A))
+   B=acos((cos(b) - cos(c)*cos(a))/(sin(c)*sin(a)))
+   C=acos((cos(c) - cos(a)*cos(b))/(sin(a)*sin(b)))
+
+  给定{a,B,C}：  // 2个角，夹1条边
+   A=acos(-cos(B)*cos(C)+sin(B)*sin(C)*cos(a))
+   b=atan2(sin(a)*sin(B)*sin(C),cos(B)+cos(C)*cos(A))
+   c=atan2(sin(a)*sin(B)*sin(C),cos(C)+cos(A)*cos(B))
+
+  给定{a,b,c}：  // 3条边
+   A=acos((cos(a) - cos(b)*cos(c))/(sin(b)*sin(c)))
+   B=acos((cos(b) - cos(c)*cos(a))/(sin(c)*sin(a)))
+   C=acos((cos(c) - cos(a)*cos(b))/(sin(a)*sin(b)))
+
+  给定{A,B,C}：  // 三个角（对于平面三角形而言这有无数个解，所以对于小的球面三角形在数值上可能不准确）
+   delta=(A+B+C-pi)/2
+   a=2*asin(sqrt(sin(delta)*sin(A-delta)/(sin(B)*sin(C))))
+   b=2*asin(sqrt(sin(delta)*sin(B-delta)/(sin(C)*sin(A))))
+   c=2*asin(sqrt(sin(delta)*sin(C-delta)/(sin(A)*sin(B))))
+
+  给定{A,a,b}：  // 2条边，不夹的1个角
+   x=sin(A)*sin(b)/sin(a)
+   if (x=1) {
+     B=pi/2    // 存在1个球面三角形
+   } else if (x < 1) {
+     B= asin(x) and pi-asin(x) // 存在2个三角形
+   } else{
+     // 三角形不存在
+   }
+   对于每一个三角形
+   c=mod(2*atan2(cos((A+B)/2)*sin((a+b)/2),cos((A-B)/2)*cos((a+b)/2)),2*pi)
+   C=mod(2*atan2(cos((a-b)/2)*cos((A+B)/2),cos((a+b)/2)*sin((A+B)/2)),2*pi)
+
+  给定{a,A,B}：  // 2个角，不夹的1条边
+   x=sin(a)*sin(B)/sin(A)
+   if (x=1) {
+     b=pi/2    // 存在1个三角形
+   } else if (x < 1) {
+     b=asin(x) and pi-asin(x) // 存在2个三角形 
+   } else{
+     // 三角形不存在
+   }
+   对于每一个三角形
+   c=mod(2*atan2(cos((A+B)/2)*sin((a+b)/2),cos((A-B)/2)*cos((a+b)/2)),2*pi)
+   C=mod(2*atan2(cos((a-b)/2)*cos((A+B)/2),cos((a+b)/2)*sin((A+B)/2)),2*pi)
+```
+对于球形三角形，内角`A+B+C`并不是`pi`（180度），而是更大一些。这个差值称为球面超`E`，定义为`E=A+B+C-pi`。
+
+球面三角形包围的表面积由下式表示
+```
+Area = E*R^2
+```
+用边表示：
+```
+    E = 4*atan(sqrt(tan(s/2)*tan((s-a)/2)*tan((s-b)/2)*tan((s-c)/2)))
+```
+其中
+```
+    s = (a+b+c)/2
+```
+这是l'Huiller公式，类似于平面三角形的Heron公式。请注意，这在小三角形的限制内，在数值上表现良好。
+
+其他一些可能偶尔有用的公式是：
+```
+   sin(A/2) = sqrt((sin(s-b)*sin(s-c))/(sin(b)*sin(c)))
+   cos(A/2) = sqrt((sin(s)*sin(s-a))/(sin(b)*sin(c)))
+   tan(A/2) = sin((b-c)/2)/(sin((b+c)/2)*tan((B-C)/2))
+            = cos((b-c)/2)/(cos((b+c)/2)*tan((B+C)/2))
+   tan(a/2) = cos((B+C)/2)*tan((b+c)/2)/cos((B-C)/2)
+            = sin((B+C)/2)*tan((b-c)/2)/sin((B-C)/2)
+   tan((A-B)/2)=cot(C/2)*sin((a-b)/2)/sin((a+b)/2)
+   tan((A+B)/2)=cot(C/2)*cos((a-b)/2)/cos((a+b)/2)
+   sin(a)*cos(B)=cos(b)*sin(c)-sin(b)*cos(c)*cos(A)
+   cos(a)*cos(C)=sin(a)*cot(b)-sin(C)*cot(B)
+```
+
+在这些公式的任何一个中，`A`、`B`和`C`可以互换，只要`a`、`b`和`c`跟着一起改变。也就是`a->b, b->c, c->a, A->B, B->C, C->A`。另外，如果 `pi-a`表示`A`、`pi-b`表示`B`及`pi-c`表示`C`或其他类似情况，公式依然成立。也就是`A->pi-a, B->pi-b, C->pi-c, a->pi-A, b->pi-B, c->pi-C`
+#### 球面直角三角形
