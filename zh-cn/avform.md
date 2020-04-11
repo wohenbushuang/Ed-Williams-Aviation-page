@@ -7,7 +7,7 @@
   - [点间距离](#点间距离)
   - [点间航线](#点间航线)
   - [大圆上点的纬度](#大圆上点的纬度)
-  - [给定径向和距离求纬度/经度](#给定径向和距离求纬度/经度)
+  - [给定径向和距离求纬度/经度](#给定径向和距离求纬度经度)
   - [径向的交点](#径向的交点)
   - [克莱劳公式](#克莱劳公式)
   - [大圆与纬线交点](#纬线交点)
@@ -19,9 +19,9 @@
   - [符号约定](#符号约定)
 - [有效示例](#有效示例)
 - [一些通用的球面三角形公式](#一些通用的球面三角形公式)
-- [`Right spherical triangles`](#right-spherical-triangles)
-- [等角航法导航](#rhumb-line-navigation)
-- [局地地球平面近似](#local-flat-earth-approximation)
+- [`球面直角三角形`](#球面直角三角形)
+- [等角航法导航](#等角航法导航)
+- [局地地球平面近似](#局地地球平面近似)
 - [Wind Triangles](#wind-triangles)
 - [Head and cross-winds](#head--and-cross-wind-components)
 - [TAS and wind speed from three groundspeeds](#tas-and-windspeed-from-three-gps-groundspeeds)
@@ -35,15 +35,15 @@
 - [Distance to the horizon.](#distance-to-horizon)
 - [Revision History](#revision-history)
 
-[Javascript calculator with elliptical earth models](http://edwilliams.org/gccalc.htm)
+[使用椭圆地球模型的Javascript计算器](http://edwilliams.org/gccalc.htm)
 
-[Sunrise-sunset algorithm](http://edwilliams.org/sunrise_sunset_algorithm.htm)
+[日出-日落算法](http://edwilliams.org/sunrise_sunset_algorithm.htm)
 
-[Sunrise-sunset example](http://edwilliams.org/sunrise_sunset_example.htm)
+[日出-日落示例](http://edwilliams.org/sunrise_sunset_example.htm)
 
-[Compass errors](http://edwilliams.org/compass/compass.html)
+[罗经误差](http://edwilliams.org/compass/compass.html)
 
-[Navigation on spheroidal earth](http://edwilliams.org/ellipsoid/ellipsoid.html)
+[在球形地球上导航](http://edwilliams.org/ellipsoid/ellipsoid.html)
 
 ---
 
@@ -275,7 +275,51 @@ latmx=acos(abs(sin(tc)*cos(lat)))
      dp = p +- acos(cos(d)/r)
    ENDIF
 ```
-`dp`即从A沿大圆AB到目标点的距离。他们的纬度/经度可以使用[给定径向和距离求纬度/经度](#给定径向和距离求纬度/经度)进行计算
+`dp`即从A沿大圆AB到目标点的距离。他们的纬度/经度可以使用[给定径向和距离求纬度/经度](#给定径向和距离求纬度经度)进行计算
 
 ---
 #### 实现说明：
+##### 数学函数说明
+注意：`^`表示幂运算符，`sqrt`是平方根函数，`acos`是反余弦（或逆余弦）函数，`asin`是反正弦函数。如果`asin`或`acos`不可用，则可以使用`atan2`函数实现它们：
+```
+acos(x)=atan2(sqrt(1-x^2),x)
+  acos 返回值范围 0 <= acos <= pi
+asin(x)=atan2(x,sqrt(1-x^2))}
+  asin 返回值范围 -pi/2 <= asin <= pi/2
+```
+注意：此处`atan2`具有常规（C）的顺序参数，即`atan2(y,x)`。这不是通用的，例如Excel使用`atan2(x,y)`，但是无论如何它都有`asin`和`acos`。提醒，它返回`-pi < atan2 <= pi`范围内的值。
+
+进一步注意：如果你的计算器/编程语言非常贫乏以至于只有`atan`可用，请使用：
+```
+   asin(x)=2*atan(x/(1+sqrt(1-x*x)))   
+   acos(x)=2*atan(sqrt((1-x)/(1+x)))       x>=0
+          =pi - 2*atan(sqrt((1+x)/(1-x)))  x<0
+
+   atan2(y,x)=atan(y/x)       x>0
+   atan2(y,x)=atan(y/x)+pi    x<0, y>=0
+   atan2(y,x)=pi/2            x=0, y>0
+   atan2(y,x)=atan(y/x)-pi    x<0, y<0
+   atan2(y,x)=-pi/2           x=0, y<0
+   atan2(0,0)未定义，应该给出一个错误。
+```
+另一个潜在的实现问题是，由于舍入误差，`asin`和/或`acos`的参数绝对值可能会超过一。这在完美的算法中是不会发生的。你可能需要使用以下行中`asin`和`acos`的“安全”版本：
+```
+  asin_safe(x)=asin(max(-1,min(x,1)))
+  acos_safe(x)=acos(max(-1,min(x,1)))
+```
+注意`mod`函数。似乎对于不同编程语言的实现，结果的符号是跟随除数还是被除数的符号有着不同的约定。（我们希望符号[跟随除数或为欧几里得的](http://en.wikipedia.org/wiki/Modulo_operation)。C的`fmod`和Java的`％`无法适用。）在本文档中，`Mod(y,x)`是`y`除以`x`的余数，并且始终在`0 <= mod < x`范围内。例如：`mod(2.3,2.)=0.3`及`mod(-2.3,2.)=1.7`
+
+如果你有`floor`函数（在Excel中为`int`），返回`floor(x)=“小于或等于x的最大整数”`，例如`floor(-2.3)=-3`及`floor(2.3)=2`
+```
+        mod(y,x) = y - x*floor(y/x)
+```
+在没有`floor`函数的情况下，无论“`int`”是截断还是向下舍入，以下应该适用：
+ ```
+    mod=y - x * int(y/x)
+    if ( mod < 0) mod = mod + x
+```
+##### 符号约定
+如概述所言，北纬和*西*经被视为正，南纬和东经为负。直接遵循会比较容易，但是如果你喜欢其他约定，你可以更改公式中的符号。
+
+---
+#### 有效示例：
