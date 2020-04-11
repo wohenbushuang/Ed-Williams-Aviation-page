@@ -32,7 +32,7 @@
 - [Mach numbers, true vs calibrated airspeeds etc.](#mach-numbers-true-vs-calibrated-airspeeds-etc)
 - [Relative humidity related to temperature and dewpoint or frostpoint](#relative-humidity-dewpoint-frostpoint-etc)
 - [Bellamy's formula for the wind drift](#bellamys-formula)
-- [Unit conversions, etc.](#unit-conversions-etc)
+- [单位转换等](#单位转换等)
 - [Turns and pivotal altitude.](#turns-and-pivotal-altitude)
 - [Distance to the horizon.](#distance-to-horizon)
 - [Revision History](#revision-history)
@@ -719,6 +719,49 @@ lon=mod(2.066470-0.778708+pi,2*pi)-pi
 
 ---
 #### 风速三角形
+（译注：此部分内容暂不感兴趣，先略过）
+
+#### 单位转换等。
+
+```
+ 1 knot = 1.852000 km/hr*
+ 1 knot = 185200/109728 ft/sec* =1.687810 ft/sec
+ 1 knot = 1852000/1609344 mph* = 1.150779 mph
+ 1 mph  = 0.868976 knot
+ 1 mph  = 1.609344 km/hr*
+ 1 mph  = 1.466667 ft/sec
+ 1 km/hr= 0.539968 knot
+ 1 km/hr= 0.911344 ft/sec
+ 1 km/hr= 0.621371 mph
+* = 精确转换系数
+```
+---
+椭球参数：
+```
+名字           长轴, a (km)    扁率 (f)
+WGS84          6378.13700	   1/298.257223563
+GRS80/NAD83    6378.13700	   1/298.257222101
+WGS66          6378.145            1/298.25
+GRS67/IAU68    6378.16000          1/298.2472
+WGS72          6378.135            1/298.26
+Krasovsky      6378.245            1/298.3
+Clarke66/NAD27 6378.2064           1/294.9786982138
+```
+参考资料: *坐标系和地图投影*, D. H. Maling (Pergamon出版社 1992年) （除了Clarke66！）
+
+在地心（半径`r`，地心纬度`u`）和大地坐标（大地纬度`v`，椭球上方的高度`h`）之间转换：
+```
+  tan(u) = tan(v)*(h*sqrt((a*cos(v))^2+(b*sin(v))^2) +b^2)/
+                  (h*sqrt((a*cos(v))^2+(b*sin(v))^2) +a^2)
+
+  r^2 = h^2 + 2*h*sqrt((a*cos(v))^2+(b*sin(v))^2)+
+               (a^4-(a^4-b^4)*(sin(v))^2)/(a^2-(a^2-b^2)*(sin(v))^2)
+```
+`a`和`b`是椭球的半长轴，且`b=a*(1-f)`，其中`f`是扁率。注意，地心经度和大地经度相等。
+
+---
+#### Turns and pivotal altitude
+（译注：此部分内容暂不感兴趣，先略过）
 
 ---
 评论、更正和建议请发至：
