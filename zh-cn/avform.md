@@ -589,3 +589,109 @@ Area = E*R^2
 
 在这些公式的任何一个中，`A`、`B`和`C`可以互换，只要`a`、`b`和`c`跟着一起改变。也就是`a->b, b->c, c->a, A->B, B->C, C->A`。另外，如果 `pi-a`表示`A`、`pi-b`表示`B`及`pi-c`表示`C`或其他类似情况，公式依然成立。也就是`A->pi-a, B->pi-b, C->pi-c, a->pi-A, b->pi-B, c->pi-C`
 #### 球面直角三角形
+If the angle B is a right angle, there are ten relations ( Napier's rules) that allow computing any unknown side or angle in terms of any two of the others:如果角`B`是直角，则有可以根据任何其他两个量来计算任何未知的边或角的十种关系（Napier法则）：
+```
+  cos(A) = sin(C)*cos(a)
+  cos(C) = sin(A)*cos(c)
+  sin(a) = sin(A)*sin(b)
+  sin(c) = sin(C)*sin(b)
+  tan(a) = tan(b)*cos(C) = sin(c)*tan(A)
+  tan(c) = tan(b)*cos(A) = sin(a)*tan(C)
+  cos(b) = cos(a)*cos(c) = 1/(tan(A)*tan(C))
+```
+#### 等角航法导航
+等角线或者恒向线是指真航向为定值的航线。除了子午线和赤道外，它们与大圆并不相同。接近任一极点时它们都用处不大，因为它们会形成紧密缠绕的螺旋形。如果某一点确实*是*极点，则下面的公式将失效。
+
+东-西方向的等角线很特别。它们贴合纬线并形成闭合曲线。其他等角线从极点延伸到极点，并环绕每个极点无数次。尽管如此，它们具有由`pi/abs(cos(tc))`给出的有限长度（它使用的是我们的弧度单位，乘以地球半径即可得到距离单位）。
+
+当两个点`(lat1,lon1), (lat2,lon2)`由真航向`tc`的等角线相连：
+```
+ lon2-lon1=-tan(tc)*(log((1+sin(lat2))/cos(lat2))-
+                     log((1+sin(lat1))/cos(lat1))) 
+          =-tan(tc)*(log((1+tan(lat2/2))/(1-tan(lat2/2)))-
+                     log((1+tan(lat1/2))/(1-tan(lat1/2))))
+          =-tan(tc)*(log(tan(lat2/2+pi/4)/tan(lat1/2+pi/4)))
+```
+（`log`是以`e`为底的“自然”对数。）
+
+点之间的真航向：
+```
+ tc= mod(atan2(lon1-lon2,log(tan(lat2/2+pi/4)/tan(lat1/2+pi/4))),2*pi)
+```
+点间距离`d`：
+```
+         if (abs(lat2-lat1) < sqrt(TOL)){
+             q=cos(lat1)
+         } else {
+             q= (lat2-lat1)/log(tan(lat2/2+pi/4)/tan(lat1/2+pi/4))
+         }
+         d=sqrt((lat2-lat1)^2+ q^2*(lon2-lon1)^2)
+```
+如果所讨论的等角线越过`180 E/W`子午线，则此公式将失效。考虑到这一点，连接两个点的最短等角线的真航向`tc`和距离`d`为：
+```
+  dlon_W=mod(lon2-lon1,2*pi)
+  dlon_E=mod(lon1-lon2,2*pi)
+  dphi=log(tan(lat2/2+pi/4)/tan(lat1/2+pi/4))
+  if (abs(lat2-lat1) < sqrt(TOL)){
+     q=cos(lat1)
+  } else {
+     q= (lat2-lat1)/dphi
+  }
+  if (dlon_W < dlon_E){// 向西的等角线最短
+      tc=mod(atan2(-dlon_W,dphi),2*pi)
+      d= sqrt(q^2*dlon_W^2 + (lat2-lat1)^2)
+  } else{
+      tc=mod(atan2(dlon_E,dphi),2*pi)
+      d= sqrt(q^2*dlon_E^2 + (lat2-lat1)^2)
+      }
+```
+要找到`(lat1,lon1)`起（起始点不能为极点！）沿真航向`tc`等角线上距离`d`的某个点纬度/经度：
+```
+  lat= lat1+d*cos(tc)
+    IF (abs(lat) > pi/2) "d太大。你没法沿等角线走这么远！"
+    IF (abs(lat-lat1) < sqrt(TOL)){
+     q=cos(lat1)
+  } ELSE {
+     dphi=log(tan(lat/2+pi/4)/tan(lat1/2+pi/4))
+     q= (lat-lat1)/dphi
+  }
+  dlon=-d*sin(tc)/q
+  lon=mod(lon1+dlon+pi,2*pi)-pi
+```
+`TOL` is a small number of order machine precision-例如`1e-15`（译注：这句不知道怎么翻译……）。该测试避免了东-西航线上出现`0/0`的不确定性。
+
+示例：
+``` 
+  假设点1是洛杉矶国际机场（IATA: LAX）：(北纬 33度 57分, 西经 118度 24分)
+  假设点2是纽约肯尼迪机场（IATA: JFK）: (北纬 40度 38分, 西经 73度 47分)
+```
+从`LAX (0.592539,2.066470)`到`JFK (0.709185,1.287762)`等角线航线：
+```
+dlon_W=mod(1.287762-2.066470,2*pi)=5.504478
+dlon_E=mod(2.066470-1.287762,2*pi)=0.778708
+
+dphi=log(tan(0.709185/2+pi/4)/tan(0.592539/2+pi/4))
+    =0.146801
+q= (0.709185-0.592539)/0.146801 =0.794586
+  dlon_E < dlon_W：向东更近！
+tc=mod(atan2(0.778708,0.146801),2*pi)= 1.384464 radians = 79.32 degrees
+d=sqrt(0.794586^2*0.778708^2 + (0.709185-0.592539)^2)
+= 0.629650 radians = 2164.6 nm
+```
+将此与航向`66度`及距离`2144 nm`的大圆航线进行比较。
+
+相反，如果我们从LAX在`79.3 degrees (1.384464 radians)`航向等角线行进`2164.6nm (0.629650 radians)`，我们的目标点将为：
+```
+lat=0.592539 + 0.629650 * cos(1.384464) 
+   = 0.709185
+dphi=log(tan(0.709185/2+pi/4)/tan(0.592539/2+pi/4))
+    =0.146801
+q= (0.709185-0.592539)/0.146801 =0.794586
+dlon=-0.629650*sin(1.384464)/0.794586=-0.778708
+lon=mod(2.066470-0.778708+pi,2*pi)-pi
+   =1.287762
+```
+便是所要求的JFK的纬度/经度。
+
+---
+#### 局地地球平面近似

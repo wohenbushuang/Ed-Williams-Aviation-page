@@ -621,7 +621,7 @@ The true course between the points is given by:
 ```
  tc= mod(atan2(lon1-lon2,log(tan(lat2/2+pi/4)/tan(lat1/2+pi/4))),2*pi)
 ```
-The dist, d between the points is given by:
+The dist, `d` between the points is given by:
 ```
          if (abs(lat2-lat1) < sqrt(TOL)){
              q=cos(lat1)
@@ -630,7 +630,7 @@ The dist, d between the points is given by:
          }
          d=sqrt((lat2-lat1)^2+ q^2*(lon2-lon1)^2)
 ```
-This formula fails if the rhumb line in question crosses the 180 E/W meridian. Allowing this as a possibility, the true course tc, and distance d, for the shortest rhumb line connecting two points is given by:
+This formula fails if the rhumb line in question crosses the 180 E/W meridian. Allowing this as a possibility, the true course `tc`, and distance `d`, for the shortest rhumb line connecting two points is given by:
 ```
   dlon_W=mod(lon2-lon1,2*pi)
   dlon_E=mod(lon1-lon2,2*pi)
