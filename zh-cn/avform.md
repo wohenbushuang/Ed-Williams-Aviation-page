@@ -24,7 +24,7 @@
 - [`球面直角三角形`](#球面直角三角形)
 - [等角航法导航](#等角航法导航)
 - [局地地球平面近似](#局地地球平面近似)
-- [Wind Triangles](#wind-triangles)
+- [风速三角形](#风速三角形)
 - [Head and cross-winds](#head--and-cross-wind-components)
 - [TAS and wind speed from three groundspeeds](#tas-and-windspeed-from-three-gps-groundspeeds)
 - [Variation](#approximate-variation-formulae)
@@ -695,3 +695,33 @@ lon=mod(2.066470-0.778708+pi,2*pi)-pi
 
 ---
 #### 局地地球平面近似
+如果你停留在一个给定的固定点`(lat0,lon0)`附近，把地球视为平面是个不错的近似，并使用以固定点为原点的北-东-下直角坐标系。如果我们把纬度和经度变化称为`dlat=lat-lat0, dlon=lon-lon0`（这里把北和东视为正！），那么
+```
+       distance_North=R1*dlat
+       distance_East=R2*cos(lat0)*dlon
+```
+`R1`和`R2`分别被称为子午线的曲率半径和卯酉圈的曲率半径。
+```
+      R1=a(1-e^2)/(1-e^2*(sin(lat0))^2)^(3/2)
+      R2=a/sqrt(1-e^2*(sin(lat0))^2)
+```
+`a`是地球赤道半径（对于WGS84`=6378.137000km`），并且`e^2=f*(2-f)`，对于WGS84扁率`f=1/298.257223563`。
+
+在本公式集其他地方使用的球形模型中，地球的半径`R1=R2=R`。（使用`R=1`，我们获得的距离为弧度，使用`R=60*180/pi`的距离为nm。）
+
+在地球平面近似中，距离和方位由通常的平面三角公式给出，即：
+```
+    distance = sqrt(distance_North^2 + distance_East^2)
+    向(lat,lon)的方位角 = mod(atan2(distance_East, distance_North), 2*pi)
+                       （= mod(atan2(cos(lat0)*dlon, dlat), 2*pi) 在球面情况下）
+```
+这些近似在极点附近和长距离情况下无效。相对误差大约是`(distance/R)^2`.
+
+---
+#### 风速三角形
+
+---
+评论、更正和建议请发至：
+
+> Ed Williams  
+> [点此获得地址](http://edwilliams.org/contact.html)
