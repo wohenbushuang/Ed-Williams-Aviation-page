@@ -1,4 +1,4 @@
-# Aviation Formulary V1.46
+# Aviation Formulary V1.47
 [Original page](http://edwilliams.org/avform.htm) | [中文翻译版](../zh-cn/avform.md)
 
 ### By Ed Williams
@@ -397,6 +397,29 @@ The great circle route from LAX to JFK crosses the 111degree W meridian at a lat
       = 0.635200radians
       = 36 degrees 24min
 ```
+The great circle from LAX crosses the 36 degree (N) parallel at a longitude of:
+```
+lon1 = 2.066470
+lon2 = 1.287762
+lat1 = 0.592539
+lat2 = 0.709186
+lat3 = 36*pi/180 = 0.628319 radians 
+l12 = lon1 - lon2 = 2.066470-1.287762 = 0.778708 radians
+A = sin(lat1)*cos(lat2)*cos(lat3)*sin(l12) = 0.240822
+B = sin(lat1)*cos(lat2)*cos(lat3)*cos(l12) - cos(lat1)*sin(lat2)*cos(lat3) = -0.192965
+C = cos(lat1)*cos(lat2)*sin(lat3)*sin(l12) = 0.259889
+lon = atan2(B,A) = -0.675518 radians
+
+abs(C) > sqrt(A^2+B^2) ?
+  abs(C) = 0.259889
+  sqrt(A^2+B^2) = 0.308595
+  false - so we have two crossings
+  dlon = acos(C/sqrt(A^2+B^2)) = 0.569000
+  lon3_1=mod(lon1+dlon+lon+pi, 2*pi)-pi = 1.96045
+  lon3_2=mod(lon1-dlon+lon+pi, 2*pi)-pi = 0.821452
+lon3_1 lies between lon1 and lon2, but lon3_2 does not, so the 36 degree parallel is crossed once between LAX and JFK at lon3_1.
+  lon3_1 = 1.96045 radians = 112 degrees 20 minutes (W)
+```
 Cross track error
 
 Suppose enroute from LAX to JFK you find yourself at (D) N34:30 W116:30, which in radians is (0.6021386,2.033309) (See earlier for LAX, JFK coordinates and course)
@@ -781,6 +804,7 @@ The purpose of the "if (HD<0) HD=HD+2* pi; if (HD>2* pi) HD=HD-2* pi" is to ensu
    XW= WS*sin(WD-RD)     (positive=  wind from right)
 ```
 where HW, XW, WS are the headwind, crosswind and wind speed. WD and RD are the wind direction (from) and runway direction.
+
 As usual, unless you have a version of sin and cos available that takes degree arguments, you'll need to convert to radians.
 
 Example: Wind 060 @ 20 departing Runway 3.
@@ -809,7 +833,7 @@ Let bp and bm be the roots of the quadratic b^2 -b + mu =0 ie:
      bp= 1/2 +sqrt(1/4-mu) 
      bm= mu/bp
 ```
-The TAS and windspeed are then given by sqrt(vms*bp) and sqrt(vms*bm) provided that the TAS exceeds the windspeed. If this is not the case, the roots are exchanged. This is a handy way to check your TAS (and the calibration of your airspeed indicator) using your GPS groundspeed, even though the wind is unknown.
+The TAS and windspeed are then given by `sqrt(vms*bp)` and `sqrt(vms*bm)` provided that the TAS exceeds the windspeed. If this is not the case, the roots are exchanged. This is a handy way to check your TAS (and the calibration of your airspeed indicator) using your GPS groundspeed, even though the wind is unknown.
 
 ---
 #### Approximate variation formulae.
@@ -978,6 +1002,7 @@ Using the M from above as the first guess on the RHS, iterate:
     M=0.881285 sqrt((DP/P + 1)(1 - 1/(7*M^2))^(5/2))
 ```
 to convergence.]
+
 P_0 is is (standard) sea-level pressure, CS_0 is the speed of sound at sea-level, CS is the speed of sound at altitude, and P is the pressure at altitude.
 
 These are given by earlier formulae:
@@ -1163,7 +1188,7 @@ With R in feet, v in knots, b in degrees and w in degrees/sec (inconsistent unit
 ```
    R =v^2/(11.23*tan(0.01745*b))
 ```
-(Example) At 100 knots, with a 45 degree bank, the radius of turn is 100^2/(11.23*tan(0.01745*45))= 891 feet.
+(Example) At 100 knots, with a 45 degree bank, the radius of turn is `100^2/(11.23*tan(0.01745*45))= 891 feet`.
 
 The rate of turn w is given by:
 ```
@@ -1203,7 +1228,11 @@ i.e. from 10000 feet, the horizon is 117nm away
 
 ---
 #### Revision History
-*Version 1.46 4/24/11*
+*Version 1.47 5/26/13*
+
+Added example for great circle crossing a parallel
+
+`1.46`
 
 Added some text about rhumb lines.
 
